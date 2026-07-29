@@ -1,0 +1,16 @@
+# grading output
+results/
+results.csv
+*.log
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# never commit these
+tests/hidden.json
+instructor/
+.env
+*.key

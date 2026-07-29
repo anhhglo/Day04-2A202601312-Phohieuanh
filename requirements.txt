@@ -1,0 +1,7 @@
+# The assignment runs on the Python standard library alone with the default `mock`
+# provider — you do NOT need to install anything to do this assignment.
+#
+# Only needed if you want to try a real model instead of the simulator:
+#   openai>=1.40        # --provider openai   (Responses API)
+#   anthropic>=0.40     # --provider anthropic
+# `--provider ollama` and `--provider gateway` need neither (plain HTTP).
