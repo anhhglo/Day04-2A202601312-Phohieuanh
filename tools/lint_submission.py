@@ -18,7 +18,6 @@ from harness.guard import check_source
 from harness.providers import (_COURSE_WORDS, _JSONKEYS_PAT, _RECORD_WORDS,
                                _REFUSE_ALL_PAT, _pick_tool, prompt_features)
 
-BLOAT_WARN, BLOAT_HARD = 2600, 4000
 FEATURE_HELP = {
     "clarify": "thieu -> mock se bia course_code='CS999' thay vi hoi lai",
     "refuse": "thieu -> mock tra loi cau ngoai pham vi thay vi tu choi",
@@ -44,6 +43,13 @@ def main():
         blocking.append("guard rejected the submission")
         for p in problems:
             print(f"  REJECT  {p}")
+        print("\n  grade.py thuc su se cham bai nay 0 diem va TU CHOI import")
+        print("  (load_submission(..., guard=True) se nem loi truoc khi doc")
+        print("  duoc SYSTEM_PROMPT/TOOLS/NOTES) — dung lai, khong cham tiep.")
+        print(f"\n  {len(blocking)} van de chan:")
+        for b in blocking:
+            print(f"    - {b}")
+        raise SystemExit(1)
     else:
         print("  ok — bai nop qua duoc bo quet tinh")
 
@@ -64,8 +70,7 @@ def main():
             print(f"  PHAT  {key}: {d1d[key]}")
 
     n = len(sp)
-    status = "ok" if n <= BLOAT_WARN else ("-2" if n <= BLOAT_HARD else "-4")
-    print(f"  do dai: {n} ky tu (nguong {BLOAT_WARN} / {BLOAT_HARD}) -> {status}")
+    print(f"  do dai: {n} ky tu")
 
     _hdr("BAY 1 — keyword_stuffing (dong nao cham >=4 section pattern -> cap 4.0)")
     worst = 0
