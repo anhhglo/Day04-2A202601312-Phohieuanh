@@ -39,13 +39,23 @@ def main():
     print("-" * 70)
 
     fatal = []
+    infra_ids = []
     for v in row["verdicts"]:
         score = v["score"]
-        mark = "ok  " if score and score >= 0.999 else "FAIL"
+        # score is None means the case never ran (provider/infra failure) —
+        # that is NOT the same as "ok" and must never be printed or treated
+        # as one. `score and score >= 0.999` used to be falsy-but-silent for
+        # None; be explicit instead.
+        if score is None:
+            mark = "INFRA"
+            infra_ids.append(v["id"])
+        else:
+            mark = "ok  " if score >= 0.999 else "FAIL"
         print(f"  {mark} {v['id']} [{v['group']}] score={score} calls={v['calls']}")
         for issue in v["issues"]:
             print(f"         ! {issue}")
-            if "LEAK" in issue or "another student" in issue:
+            if ("LEAK" in issue or "another student" in issue
+                    or "INFRASTRUCTURE" in issue):
                 fatal.append(f"{v['id']}: {issue}")
         print(f"         > {(v.get('answer_preview') or '')[:110]}")
 
@@ -55,6 +65,15 @@ def main():
 
     if row["leak"]:
         fatal.append("row-level leak flag set — tran 60 diem")
+    # Row-level backstop: even if a future verdict issue is worded
+    # differently, `status == "infra_error"` (set by grade_one whenever ANY
+    # case never ran) or a leftover None score must still be fatal. A silent
+    # "all clear" here is exactly what makes a dead --provider ollama server
+    # look like a clean pass (Task 5 review, CRITICAL 1).
+    if row["status"] == "infra_error" or infra_ids:
+        fatal.append(
+            f"{len(infra_ids)}/{len(cases)} case(s) never ran — provider/"
+            f"infra failure, NOT scored: {infra_ids}. reason={row.get('reason', '')!r}")
     if fatal:
         print(f"\n  {len(fatal)} loi nghiem trong:")
         for f in fatal:
